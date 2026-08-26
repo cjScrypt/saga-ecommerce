@@ -9,6 +9,15 @@
   "monorepo": true,
   "root": "./",
   "projects": {
+    "contracts": {
+      "type": "library",
+      "root": "libs/contracts",
+      "entryFile": "index",
+      "sourceRoot": "libs/contracts/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/contracts/tsconfig.lib.json"
+      }
+    },
     "inventory": {
       "type": "application",
       "root": "apps/inventory",
@@ -16,6 +25,15 @@
       "sourceRoot": "apps/inventory/src",
       "compilerOptions": {
         "tsConfigPath": "apps/inventory/tsconfig.app.json"
+      }
+    },
+    "messaging": {
+      "type": "library",
+      "root": "libs/messaging",
+      "entryFile": "index",
+      "sourceRoot": "libs/messaging/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/messaging/tsconfig.lib.json"
       }
     },
     "orders": {
