@@ -1,0 +1,57 @@
+services:
+  kafka:
+    image: apache/kafka:3.7.1
+    environment:
+      KAFKA_NODE_ID: 0
+      KAFKA_PROCESS_ROLES: controller,broker
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
+      KAFKA_LISTENERS: CLIENT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: CLIENT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,CLIENT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: CLIENT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports: ["9092:9092"]
+
+  orders-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: orders_db
+      POSTGRES_PASSWORD: pwd
+
+  inventory-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: inventory_db
+      POSTGRES_PASSWORD: pwd
+
+  payments-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: payment_db
+      POSTGRES_PASSWORD: pwd
+
+  orders:
+    build:
+      context: .
+      dockerfile: apps/orders/Dockerfile
+    environment:
+      KAFKA_BROKER: kafka:9092
+    ports: ["3000:3000"]
+    depends_on: [kafka, orders-db]
+
+  inventory:
+    build:
+      context: .
+      dockerfile: apps/inventory/Dockerfile
+    environments:
+      KAFKA_BROKER: kafka:9092
+    depends_on: [kafka, inventory-db]
+
+  payments:
+    build:
+      context: .
+      dockerfile: apps/payments/Dockerfile
+    environment:
+        KAFKA_BROKER: kafka:9092
+    depends_on: [kafka, payments-db]

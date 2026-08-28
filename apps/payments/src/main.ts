@@ -1,8 +1,22 @@
 import { NestFactory } from '@nestjs/core';
 import { PaymentsModule } from './payments.module';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
-  const app = await NestFactory.create(PaymentsModule);
-  await app.listen(process.env.port ?? 3000);
+  const app = await NestFactory.createMicroservice<MicroserviceOptions>(
+    PaymentsModule,
+    {
+      transport: Transport.KAFKA,
+      options: {
+        client: { clientId: 'payment', brokers: [process.env.KAFKA_BROKER] },
+        consumer: { groupId: 'payment-consumer' },
+      },
+    },
+  );
+  await app.listen();
 }
-bootstrap();
+
+bootstrap().catch((err) => {
+  console.error('Failed to start Payment service', err);
+  process.exit(1);
+});
