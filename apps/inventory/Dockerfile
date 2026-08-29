@@ -1,11 +1,7 @@
-FROM node:22-alpine AS deps
+FROM node:22-alpine AS builder
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
-
-FROM node:22-alpine AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
 COPY tsconfig.json nest-cli.json ./
 COPY apps/inventory ./apps/inventory
 COPY libs ./libs

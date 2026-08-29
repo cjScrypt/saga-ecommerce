@@ -17,26 +17,25 @@ services:
     image: postgres:16
     environment:
       POSTGRES_DB: orders_db
-      POSTGRES_PASSWORD: pwd
+      POSTGRES_PASSWORD: password
 
   inventory-db:
     image: postgres:16
     environment:
       POSTGRES_DB: inventory_db
-      POSTGRES_PASSWORD: pwd
+      POSTGRES_PASSWORD: password
 
   payments-db:
     image: postgres:16
     environment:
-      POSTGRES_DB: payment_db
-      POSTGRES_PASSWORD: pwd
+      POSTGRES_DB: payments_db
+      POSTGRES_PASSWORD: password
 
   orders:
     build:
       context: .
       dockerfile: apps/orders/Dockerfile
-    environment:
-      KAFKA_BROKER: kafka:9092
+    env_file: apps/orders/.env
     ports: ["3000:3000"]
     depends_on: [kafka, orders-db]
 
@@ -44,14 +43,12 @@ services:
     build:
       context: .
       dockerfile: apps/inventory/Dockerfile
-    environments:
-      KAFKA_BROKER: kafka:9092
+    env_file: apps/inventory/.env
     depends_on: [kafka, inventory-db]
 
   payments:
     build:
       context: .
       dockerfile: apps/payments/Dockerfile
-    environment:
-        KAFKA_BROKER: kafka:9092
+    env_file: apps/payments/.env
     depends_on: [kafka, payments-db]
