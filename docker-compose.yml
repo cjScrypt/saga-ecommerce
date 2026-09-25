@@ -1,0 +1,54 @@
+services:
+  kafka:
+    image: apache/kafka:3.7.1
+    environment:
+      KAFKA_NODE_ID: 0
+      KAFKA_PROCESS_ROLES: controller,broker
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
+      KAFKA_LISTENERS: CLIENT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: CLIENT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,CLIENT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: CLIENT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports: ["9092:9092"]
+
+  orders-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: orders_db
+      POSTGRES_PASSWORD: password
+
+  inventory-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: inventory_db
+      POSTGRES_PASSWORD: password
+
+  payments-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: payments_db
+      POSTGRES_PASSWORD: password
+
+  orders:
+    build:
+      context: .
+      dockerfile: apps/orders/Dockerfile
+    env_file: apps/orders/.env
+    ports: ["3000:3000"]
+    depends_on: [kafka, orders-db]
+
+  inventory:
+    build:
+      context: .
+      dockerfile: apps/inventory/Dockerfile
+    env_file: apps/inventory/.env
+    depends_on: [kafka, inventory-db]
+
+  payments:
+    build:
+      context: .
+      dockerfile: apps/payments/Dockerfile
+    env_file: apps/payments/.env
+    depends_on: [kafka, payments-db]
